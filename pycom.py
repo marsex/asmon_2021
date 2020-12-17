@@ -1,4 +1,4 @@
-from structure import machine_data, color, cam, wifi, sys_state
+from structure import machine_data, color, cam, wifi, sys_state, update
 from structure import headers as hdr
 from time import sleep
 import uasyncio as asyncio
@@ -18,10 +18,12 @@ cam.start()
 json_command={}
 
 def start(to):
+    if sys_state.restore() == False:
+        sys_state.reset()
+
     try:
         main_loop = asyncio.new_event_loop()
         main_loop.create_task(check_state(2))
-        main_loop.create_task(wifi_state(2))
         main_loop.create_task(data(to))
         main_loop.create_task(sendcam(to))
         main_loop.create_task(ap_cam(to))
@@ -33,26 +35,35 @@ def start(to):
     gc.collect()
     gc.mem_free()
 
-async def wifi_state(loop_delay):
+async def check_state(loop_delay):
     print(color.yellow()+'wifi state running'+color.normal())
     while True:
         credentials = wifi.get_credentials()
         cd_state, cd_ssid, cd_pw = credentials
         wifi_st = network.WLAN(network.STA_IF).isconnected()
-        sys_state.set('credentials',credentials)
+        server_list = sys_state.get('server_list')
+        data_server = sys_state.get('data_server')
+        cam_server = sys_state.get('cam_server')
         sys_state.set('wifi',wifi_st)
         if wifi_st == False:
             if cd_state != False:
                 wifi.connect(cd_ssid,cd_pw)
+        else:
+            if server_list == '':
+                try:
+                    server_request = update.read_remote('server_list','https://raw.githubusercontent.com/marsex/asmon/master/')
+                    server_list = json.loads(server_request.text)
+                    data_host, data_port = server_list['data_host'][0].split(':')
+                    cam_host, cam_port = server_list['cam_host'][0].split(':')
+                    
+                    sys_state.set('server_list',server_list)
+                    sys_state.setd('data_server','host',data_host)
+                    sys_state.setd('data_server','port',data_port)
+                    sys_state.setd('cam_server','host',cam_host)
+                    sys_state.setd('cam_server','port',cam_port)
+                except:
+                    sys_state.reset()
 
-        await asyncio.sleep(loop_delay)
-        
-async def check_state(loop_delay)
-    print(color.yellow()+'async status system running'+color.normal())
-    while True:
-        credentials = sys_state.get('credentials')
-        wifi_st = network.WLAN(network.STA_IF).isconnected()
-        
         await asyncio.sleep(loop_delay)
 
 async def ap_sv(to):
@@ -203,21 +214,27 @@ async def data(to):
     global json_command
     print(color.green()+'STARTING PYCOM DATA'+color.normal())
     await asyncio.sleep(1)
-    data_host, port = sys_state.get('data_host').split(':')
-    data_address = ''
     while True:
-        wifi_st=sys_state.get('wifi')
+        data_server = sys_state.get('data_server')
+        data_host = data_server['host']
+        port = data_server['port']
+        data_address = data_server['address']
+        wifi_st = sys_state.get('wifi')
         if wifi_st == False:
             print('Wifi not ready')
             await asyncio.sleep(3)
         if wifi_st != False:
-            if data_address = '':
-                try:
-                    data_address = socket.getaddrinfo(data_host, port)[0][-1]
-                    print('got cam addr info')
-                except: 
-                    data_address = ''
-                    print('Error getting data addr info')
+            if data_address == '':
+                if data_host != '':
+                    try:
+                        data_address = socket.getaddrinfo(data_host, port)[0][-1]
+                        sys_state.setd('data_server','address',data_address)
+                    except: 
+                        data_address = ''
+                        print('Error getting data addr info')
+                else:
+                    print('data_host not ready')
+                    await asyncio.sleep(3)
             else:
                 conn_try=0
                 print(color.green()+'{\n\tCONNECTING TO PYCOM DATA'+color.normal())
@@ -283,7 +300,7 @@ async def data(to):
                             print('data com failed '+ str(e))
                     print(color.yellow()+'\tdata conn_try', conn_try)
                     print(color.red()+'\tesp_data out\n}\n'+color.normal())
-                    sys_state.set('data_host',{'addr':data_host,'timeout':conn_try})
+                    sys_state.setd('data_server','timeout',conn_try)
                     s.close()
                     del s
                 except OSError as e:
@@ -292,23 +309,31 @@ async def data(to):
         await asyncio.sleep(.1)
 
 async def sendcam(to):
+    await asyncio.sleep(1)
     print(color.blue()+'STARTING PYCOM CAM'+color.normal())
     await asyncio.sleep(1)
-    cam_host, port = sys_state.get('data_host').split(':')
-    cam_address = ''
     while True:
+        cam_server = sys_state.get('cam_server')
+        cam_host = cam_server['host']
+        port = cam_server['port']
+        cam_address = cam_server['address']
+        wifi_st = sys_state.get('wifi')
         wifi_st = sys_state.get('wifi')
         if wifi_st == False:
             print('Wifi not ready')
             await asyncio.sleep(3)
         if wifi_st != False:
-            if cam_address = '':
-                try:
-                    cam_address = socket.getaddrinfo(cam_host, port)[0][-1]
-                    print('got CAM addr info')
-                except: 
-                    cam_address = ''
-                    print('Error getting CAM addr info')
+            if cam_address == '':
+                if cam_host != '':
+                    try:
+                        cam_address = socket.getaddrinfo(cam_host, port)[0][-1]
+                        sys_state.setd('cam_server','address',cam_address)
+                    except: 
+                        cam_address = ''
+                        print('Error getting CAM addr info')
+                else:
+                    print('cam_host not ready')
+                    await asyncio.sleep(3)
             else:
                 conn_try=0
                 print(color.blue()+'{\n\tCONNECTING TO PYCOM CAM'+color.normal())
@@ -366,7 +391,7 @@ async def sendcam(to):
                             print('\tsending cam failed '+str(e))
                     print(color.yellow()+'\tcam conn_try', conn_try)
                     print(color.red()+'\tcam out\n}\n'+color.normal())
-                    sys_state.set('cam_host',{'addr':cam_host,'timeout':conn_try})
+                    sys_state.setd('cam_server','timeout',conn_try)
                     s.close()
                     del s
                 except OSError as e:
