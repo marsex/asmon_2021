@@ -1,4 +1,4 @@
-from structure import machine_data, color, cam, wifi, async_sys
+from structure import machine_data, color, cam, wifi, sys_state
 from structure import headers as hdr
 from time import sleep
 import uasyncio as asyncio
@@ -19,7 +19,9 @@ json_command={}
 
 def start(to):
     try:
-        main_loop = asyncio.new_event_loop()  
+        main_loop = asyncio.new_event_loop()
+        main_loop.create_task(check_state(2))
+        main_loop.create_task(wifi_state(2))
         main_loop.create_task(data(to))
         main_loop.create_task(sendcam(to))
         main_loop.create_task(ap_cam(to))
@@ -30,7 +32,29 @@ def start(to):
     print("async out")   
     gc.collect()
     gc.mem_free()
-    
+
+async def wifi_state(loop_delay):
+    print(color.yellow()+'wifi state running'+color.normal())
+    while True:
+        credentials = wifi.get_credentials()
+        cd_state, cd_ssid, cd_pw = credentials
+        wifi_st = network.WLAN(network.STA_IF).isconnected()
+        sys_state.set('credentials',credentials)
+        sys_state.set('wifi',wifi_st)
+        if wifi_st == False:
+            if cd_state != False:
+                wifi.connect(cd_ssid,cd_pw)
+
+        await asyncio.sleep(loop_delay)
+        
+async def check_state(loop_delay)
+    print(color.yellow()+'async status system running'+color.normal())
+    while True:
+        credentials = sys_state.get('credentials')
+        wifi_st = network.WLAN(network.STA_IF).isconnected()
+        
+        await asyncio.sleep(loop_delay)
+
 async def ap_sv(to):
     print(color.yellow()+'STARTING AP_SV'+color.normal())
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -179,163 +203,173 @@ async def data(to):
     global json_command
     print(color.green()+'STARTING PYCOM DATA'+color.normal())
     await asyncio.sleep(1)
-    data_host, port = async_sys.get('data_host').split(':')
+    data_host, port = sys_state.get('data_host').split(':')
     data_address = ''
     while True:
-        if 'data_address' = '':
-            try:
-                data_address = socket.getaddrinfo(data_host, port)[0][-1]
-                print('got cam addr info')
-            except: 
-                data_address = ''
-                print('Error getting data addr info')
-        else:
-            conn_try=0
-            print(color.green()+'{\n\tCONNECTING TO PYCOM DATA'+color.normal())
-            try:
-                s = socket.socket()
-                s.setblocking(False)
-                connected = False
-                while connected == False:
-                    try:
-                        s.connect(data_address)
-                    except OSError as e:
-                        if str(e) == "127":
-                            connected = True
-                            conn_try = 0
-                        else:
-                            conn_try = conn_try+1
-                            if conn_try > to:
-                                print(color.red()+'\tDATA CONN F'+color.normal())
-                                conn_try = to
-                                break
-                    await asyncio.sleep(.1)
-                    pass
-                if conn_try != to:
-                    print(color.green()+'\tconnected to data_address'+color.normal())
-                    conn_try = 0
-                    try:
-                        print('\tsending esp_data')
-                        while True:
-                            try:
-                                data = json.dumps(machine_data.get())
-                                data = data.encode()
-                                while data:
-                                    sent = s.send(data)
-                                    data = data[sent:]
-                                    await asyncio.sleep(.2)
+        wifi_st=sys_state.get('wifi')
+        if wifi_st == False:
+            print('Wifi not ready')
+            await asyncio.sleep(3)
+        if wifi_st != False:
+            if data_address = '':
+                try:
+                    data_address = socket.getaddrinfo(data_host, port)[0][-1]
+                    print('got cam addr info')
+                except: 
+                    data_address = ''
+                    print('Error getting data addr info')
+            else:
+                conn_try=0
+                print(color.green()+'{\n\tCONNECTING TO PYCOM DATA'+color.normal())
+                try:
+                    s = socket.socket()
+                    s.setblocking(False)
+                    connected = False
+                    while connected == False:
+                        try:
+                            s.connect(data_address)
+                        except OSError as e:
+                            if str(e) == "127":
+                                connected = True
                                 conn_try = 0
-                                break
-                            except OSError as e:
-                                #print(e)
-                                if conn_try > to:
-                                    print(color.red()+'DATA SEND F'+color.normal())
-                                    break
+                            else:
                                 conn_try = conn_try+1
-                                
-                        if conn_try != to:
-                            print('\treceiving server data')
+                                if conn_try > to:
+                                    print(color.red()+'\tDATA CONN F'+color.normal())
+                                    conn_try = to
+                                    break
+                        await asyncio.sleep(.1)
+                        pass
+                    if conn_try != to:
+                        print(color.green()+'\tconnected to data_address'+color.normal())
+                        conn_try = 0
+                        try:
+                            print('\tsending esp_data')
                             while True:
                                 try:
-                                    res = str(s.recv(256))
-                                    await asyncio.sleep(.1)
-                                    if res.find('command') != -1:
-                                        print('\tserver data received: ')
-                                        print('\t'+res)
-                                        break
+                                    data = json.dumps(machine_data.get())
+                                    data = data.encode()
+                                    while data:
+                                        sent = s.send(data)
+                                        data = data[sent:]
+                                        await asyncio.sleep(.2)
+                                    conn_try = 0
+                                    break
                                 except OSError as e:
+                                    #print(e)
                                     if conn_try > to:
-                                        print(color.red()+'DATA RECV F'+color.normal())
+                                        print(color.red()+'DATA SEND F'+color.normal())
                                         break
-                                    conn_try = conn_try + 1
-                                    #print('error receiving '+str(e))
-                        s.close()
-                    except OSError as e:
-                        print('data com failed '+ str(e))
-                print(color.yellow()+'\tdata conn_try', conn_try)
-                print(color.red()+'\tesp_data out\n}\n'+color.normal())
-                async_sys.set('data_host',{'addr':data_address,'timeout':conn_try})
-                s.close()
-                del s
-            except OSError as e:
-                print('data socket failed',str(e))
+                                    conn_try = conn_try+1
+                                    
+                            if conn_try != to:
+                                print('\treceiving server data')
+                                while True:
+                                    try:
+                                        res = str(s.recv(256))
+                                        await asyncio.sleep(.1)
+                                        if res.find('command') != -1:
+                                            print('\tserver data received: ')
+                                            print('\t'+res)
+                                            break
+                                    except OSError as e:
+                                        if conn_try > to:
+                                            print(color.red()+'DATA RECV F'+color.normal())
+                                            break
+                                        conn_try = conn_try + 1
+                                        #print('error receiving '+str(e))
+                            s.close()
+                        except OSError as e:
+                            print('data com failed '+ str(e))
+                    print(color.yellow()+'\tdata conn_try', conn_try)
+                    print(color.red()+'\tesp_data out\n}\n'+color.normal())
+                    sys_state.set('data_host',{'addr':data_host,'timeout':conn_try})
+                    s.close()
+                    del s
+                except OSError as e:
+                    print('data socket failed',str(e))
         gc.collect()
         await asyncio.sleep(.1)
 
 async def sendcam(to):
     print(color.blue()+'STARTING PYCOM CAM'+color.normal())
     await asyncio.sleep(1)
-    cam_host, port = async_sys.get('data_host').split(':')
+    cam_host, port = sys_state.get('data_host').split(':')
     cam_address = ''
     while True:
-        if 'cam_address' = '':
-            try:
-                cam_address = socket.getaddrinfo(cam_host, port)[0][-1]
-                print('got CAM addr info')
-            except: 
-                cam_address = ''
-                print('Error getting CAM addr info')
-        else:
-            conn_try=0
-            print(color.blue()+'{\n\tCONNECTING TO PYCOM CAM'+color.normal())
-            try:
-                s = socket.socket()
-                s.setblocking(False)
-                connected = False
-                while connected == False:
-                    try:
-                        s.connect(cam_address)
-                    except OSError as e:
-                        if str(e) == "127":
-                            connected = True
-                            conn_try = 0
-                        else:
-                            conn_try = conn_try+1
-                            if conn_try > to:
-                                print(color.red()+'\tCAM CONN F'+color.normal())
-                                conn_try = to
-                                break
-                    await asyncio.sleep(.1)
-                    pass
-                if conn_try != to:
-                    print(color.blue()+'\tconnected to cam_address'+color.normal())
-                    conn_try = 0
-                    try:
-                        n_try = 0
-                        buf = False
-                        cam.light('1')
-                        while (n_try < 10 and buf == False): #{
-                            # wait for sensor to start and focus before capturing image
-                            print('\tgetting img')
-                            buf = camera.capture()
-                            if (buf == False): await asyncio.sleep(1)
-                            n_try = n_try + 1
-                        cam.light('0')
-                        print('\tsending img:', len(buf))
-                        while True:
-                            try:             
-                                while buf:
-                                    sent = s.send(buf)
-                                    buf = buf[sent:]
+        wifi_st = sys_state.get('wifi')
+        if wifi_st == False:
+            print('Wifi not ready')
+            await asyncio.sleep(3)
+        if wifi_st != False:
+            if cam_address = '':
+                try:
+                    cam_address = socket.getaddrinfo(cam_host, port)[0][-1]
+                    print('got CAM addr info')
+                except: 
+                    cam_address = ''
+                    print('Error getting CAM addr info')
+            else:
+                conn_try=0
+                print(color.blue()+'{\n\tCONNECTING TO PYCOM CAM'+color.normal())
+                try:
+                    s = socket.socket()
+                    s.setblocking(False)
+                    connected = False
+                    while connected == False:
+                        try:
+                            s.connect(cam_address)
+                        except OSError as e:
+                            if str(e) == "127":
+                                connected = True
                                 conn_try = 0
-                                break
-                            except OSError as e:
-                                #print(e)
-                                if conn_try > to:
-                                    print(color.red()+'CAM SEND F'+color.normal())
-                                    break
+                            else:
                                 conn_try = conn_try+1
-                            await asyncio.sleep(.1)
+                                if conn_try > to:
+                                    print(color.red()+'\tCAM CONN F'+color.normal())
+                                    conn_try = to
+                                    break
                         await asyncio.sleep(.1)
-                        print('\timg sent')
-                    except OSError as e:
-                        print('\tsending cam failed '+str(e))
-                print(color.yellow()+'\tcam conn_try', conn_try)
-                print(color.red()+'\tcam out\n}\n'+color.normal())
-                async_sys.set('cam_host',{'addr':cam_address,'timeout':conn_try})
-                s.close()
-                del s
-            except OSError as e:
-                print('cam socket failed',str(e))
+                        pass
+                    if conn_try != to:
+                        print(color.blue()+'\tconnected to cam_address'+color.normal())
+                        conn_try = 0
+                        try:
+                            n_try = 0
+                            buf = False
+                            cam.light('1')
+                            while (n_try < 10 and buf == False): #{
+                                # wait for sensor to start and focus before capturing image
+                                print('\tgetting img')
+                                buf = camera.capture()
+                                if (buf == False): await asyncio.sleep(1)
+                                n_try = n_try + 1
+                            cam.light('0')
+                            print('\tsending img:', len(buf))
+                            while True:
+                                try:             
+                                    while buf:
+                                        sent = s.send(buf)
+                                        buf = buf[sent:]
+                                    conn_try = 0
+                                    break
+                                except OSError as e:
+                                    #print(e)
+                                    if conn_try > to:
+                                        print(color.red()+'CAM SEND F'+color.normal())
+                                        break
+                                    conn_try = conn_try+1
+                                await asyncio.sleep(.1)
+                            await asyncio.sleep(.1)
+                            print('\timg sent')
+                        except OSError as e:
+                            print('\tsending cam failed '+str(e))
+                    print(color.yellow()+'\tcam conn_try', conn_try)
+                    print(color.red()+'\tcam out\n}\n'+color.normal())
+                    sys_state.set('cam_host',{'addr':cam_host,'timeout':conn_try})
+                    s.close()
+                    del s
+                except OSError as e:
+                    print('cam socket failed',str(e))
         gc.collect()
         await asyncio.sleep(.1)
