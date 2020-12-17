@@ -1,0 +1,294 @@
+<html>
+<meta charset="utf-8" name="viewport" content= "width=device-width, user-scalable=no">
+<style type="text/css">
+  html, body, p, li {
+    height: -webkit-fill-available;
+    margin: auto;
+    font-size: 16px;
+    font-family: "Segoe UI";
+    min-width: 320px;
+  }
+  ::-webkit-scrollbar {
+      width: 0px;
+      background: transparent; /* make scrollbar transparent */
+  }
+.switch {
+position: relative;
+width: 44px;
+display: inline-block;
+height: 34px;
+}
+.led {
+position: relative;
+display: inline-block;
+width: 34px;
+height: 34px;
+}
+.entrada {
+top: 1px;
+position: absolute;
+border-radius: 50%;
+background-color: #ff504f;
+width: 34px;
+height: 34px;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+}
+.entrada input{
+opacity: 0;
+width: 0;
+height: 0;
+}
+input:checked + .entrada {background-color: #02e266}
+.switch input {
+opacity: 0;
+width: 0;
+height: 0;
+}
+.slider {
+position: absolute;
+cursor: pointer;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background-color: #ff504f;
+-webkit-transition: .15s;
+transition: .15s;
+}
+.slider:before {
+	position: absolute;
+	content: "";
+	height: 32px;
+	width: 32px;
+	left: 1px;
+	bottom: 1px;
+	background-color: white;
+	-webkit-transition: .15s;
+	transition: .15s;
+}
+input:checked + .slider {background-color: #02e266;}
+input:focus + .slider {box-shadow: 0 0 0 #2196F3;}
+input:checked + .slider:before {
+-webkit-transform: translateX(10px);
+-ms-transform: translateX(10px);
+transform: translateX(10px);
+}
+.slider.round {border-radius: 34px;}
+.slider.round:before {border-radius: 50%;}
+  .controles_layer {
+	width:350px;
+    margin:auto;
+  }
+  .container{
+    display:flex;
+  }
+  .control {
+    padding-top: 2px;
+    padding-left: 2px;
+  }
+  .etiqueta{
+    font-size: 16px;
+    flex-grow: 1;
+  }
+	
+	.lbl_t{
+		width: 100%; height: 100%;
+	}
+	
+	.lbl_td{
+		text-align: center; vertical-align: middle; margin:auto;
+	}	
+	
+	input[type=submit] {
+		font-size: 15px;
+		background-color: #29A0FF;
+		border: none;
+		border-radius: 4px;
+		color: white;
+		cursor: pointer;
+		margin-top:10px;
+	}
+	
+	.Excelente{background: #8bff84;}
+	.Buena{background: #f8ff8a;}
+	.Mala{background: #ff9191;}
+</style>
+<title>ESP32 Login</title>
+<body style="text-align: center;">
+	<div class="cfg" style="display: inline-block;">
+		<h1>Configuracion red WIFI</h1>
+		<table border="1" style="width: 100%;">
+			<tbody>
+				<tr style="height:48px">
+					<th>Red:</th>
+					<th>Señal:</th>
+				</tr>
+				$tr_swap
+			</tbody>
+		</table>
+
+		<div class="psw" style="margin-top: 10px;">
+			<label style="text-align: left;display: block;">Red:</label>
+			<input id="wifi_ssid" style="padding: 8px 8px; display: block;width: 94%;" disabled>
+			<label style="text-align: left;display: block;">Contraseña:</label>
+			<input id="wifi_psw" style="padding: 8px 8px;display: block;width: 94%;">
+			<input onclick="save_cfg()"id="login_input" value="GUARDAR" type="submit" style="width: 100%;height: 58px;">
+		</div>
+		<br>
+  </div>
+
+		<div class="controles_layer">
+			<h1>Control Manual</h1>
+			<div class="container">
+				<div class="control">
+					<label id="swi-0" class="switch">
+						<input id="pin-0" disabled="disabled" type="checkbox">
+						<span class="slider round"></span>
+					</label>
+				</div>
+
+				<div class="etiqueta">
+					<table class="lbl_t">
+						<tbody>
+							<tr>
+								<td class="lbl_td">
+									Salida 1
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<div class="control">
+					<label class="led">
+						<input id="in-0" disabled="disabled" type="checkbox">
+						<span class="entrada"></span>
+					</label>
+				</div>
+
+				<div class="etiqueta">
+					<table class="lbl_t">
+						<tbody>
+							<tr>
+								<td class="lbl_td">
+									Entrada 1
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div> 
+			
+		  <div class="container">
+			<div class="control"><label id="swi-1" class="switch">
+			  <input id="pin-1" disabled="disabled" type="checkbox"><span class="slider round"></span></label></div>
+			<div class="etiqueta"><table class="lbl_t"><tbody><tr><td class="lbl_td">
+			  Salida 2</td></tr></tbody></table></div>
+			<div class="control"><label class="led">
+			  <input id="in-1" disabled="disabled" type="checkbox"><span class="entrada"></span></label></div>
+			<div class="etiqueta"><table class="lbl_t"><tbody><tr><td class="lbl_td">
+			  Entrada 2</td></tr></tbody></table></div>
+		  </div>
+		  <div class="container" style="width: 174px;">
+			<div class="control"><label id="swi-2" class="switch">
+			  <input id="pin-2" disabled="disabled" type="checkbox"><span class="slider round"></span></label></div>
+			<div class="etiqueta"><table class="lbl_t"><tbody><tr><td class="lbl_td">
+			  Salida 3</td></tr></tbody></table></div>
+			
+		  </div>
+		</div>
+</div>
+
+
+		<h1>Camara</h1>
+<img id="camview" src="" width="100%" />
+
+		<h1>Configuracion Camara</h1>
+
+<script>
+    last_sender = ""
+    selected_ssid = "$cred_ssid"
+    selected_psw = "$cred_psw"
+
+    og_url = window.location.href
+	document.getElementById('camview').src = og_url.replace('/app','') + ":81/live"
+    document.getElementById('wifi_ssid').value = selected_ssid
+    document.getElementById('wifi_psw').value = selected_psw
+
+	for (x=0;x<8;x++){
+		pin='swi-'+x;
+		document.getElementById(pin).addEventListener('click', send_out);
+	}
+    
+    function set_ssid(sender){
+      if (last_sender != sender){last_sender.style="background:white"}
+      sender.style="background:#92cfff"
+      selected_ssid = sender.textContent
+      document.getElementById('wifi_ssid').value = selected_ssid
+      last_sender = sender
+    }
+
+    function save_cfg(){
+		ssid_psw = document.getElementById('wifi_psw').value
+		command = 'credentials'
+		data = selected_ssid + "/" + ssid_psw
+		send_data(command,data)
+    }
+	
+	function send_out(pin){
+        send_output(document.getElementById(this.id))
+    }
+
+	function send_output(out){
+		pin=out.id
+		pin=pin.slice(4,5)
+		pin=Number(pin)
+		swi='pin-'+pin
+		pin=pin+1
+		if (document.getElementById(swi).checked == true){
+			command='gpio'
+			data=pin+'/0'
+		}
+		else{
+			command='gpio'
+			data=pin+'/1'
+		}
+		
+		console.log(command+':'+data)
+		
+		send_data(command,data)
+	}
+	
+	function send_data(command,data){
+		url_data = og_url.replace('/app','') + "/" + command + "/" + data
+		console.log(url_data)
+		fetch(url_data).then(function(response) {return response.json();}).then(function(json){
+			response_command = json['command']
+			if (response_command == 'output_state'){
+				for (x in json['output_state']){
+					out='pin-'+x
+					output_switch = document.getElementById(out)
+
+					if (json['output_state'][x] == 1){
+						if (output_switch.checked == false){
+							//hide_layer(loading)
+						}
+						output_switch.checked = true
+					}else{
+						if (output_switch.checked == true){
+							//hide_layer(loading)
+						}
+						output_switch.checked = false
+					}
+				}
+			}
+		});
+	}
+	
+	
+</script>
+</body>
+</html>
