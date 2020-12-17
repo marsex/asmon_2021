@@ -9,8 +9,8 @@ state={
     'wifi':'',
     'credentials':'',
     'cam':'',
-    'data_server':'',
-    'cam_server':''
+    'data_host':'',
+    'cam_host':''
 }
 
 def check_state(loop_delay):
