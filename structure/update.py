@@ -47,7 +47,7 @@ def git_file(file_name):
   try:
     outdated_file=urequests.get(git_url+file_name)
     try:
-      file = open("/structure/"+file_name,"w")
+      file = open(file_name,"w")
       file.write(outdated_file.text)
       file.close()
       print(color.normal()+outdated_file.text)

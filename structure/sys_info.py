@@ -7,7 +7,7 @@ def git_url():
 def esp_info():
   print('\n{\n\tgetting esp system info')
   try:
-    sys_file = open('/structure/sys_info','r')
+    sys_file = open('/sys_info','r')
     esp_sys_info = json.loads(sys_file.read())
     sys_file.close()
     print('\tgot esp system info\n}')
