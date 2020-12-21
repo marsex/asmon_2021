@@ -9,6 +9,7 @@ import socket
 import uerrno
 import json
 import gc
+import machine
 
 wifi.ap_on()
 wifi.scan_networks()
@@ -34,6 +35,7 @@ def start(to):
     print("async out")   
     gc.collect()
     gc.mem_free()
+    machine.reset()
 
 async def check_state(loop_delay):
     print(color.yellow()+'wifi state running'+color.normal())
@@ -99,7 +101,7 @@ async def ap_sv(to):
                     print('\t#failed to split req', e)
 
                 if req[1] == 'app':
-                    print('\taccesing',req[1])
+                    print('\taccesing', req[1])
                     html = hdr.get_index()
                     index_data = (b'%s' % html)
                     while True:
@@ -398,3 +400,5 @@ async def sendcam(to):
                     print('cam socket failed',str(e))
         gc.collect()
         await asyncio.sleep(.1)
+
+start(50)
