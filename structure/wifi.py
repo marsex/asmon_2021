@@ -1,6 +1,5 @@
 import network
 import socket
-import _thread
 from time import sleep
 
 scan_list = []
@@ -38,23 +37,24 @@ def get_networks():
 
 def get_credentials():
     global cred_ssid, cred_psw
-    file = open("/structure/credentials","r")
-    data = file.read()
-    file.close()
-
-    cred_ssid=data.split(",")[0]
-    cred_psw=data.split(",")[1]
-
-    if cred_ssid == 'null':
+    try:
+        file = open("credentials","r")
+        data = file.read()
+        file.close()
+        cred_ssid=data.split(",")[0]
+        cred_psw=data.split(",")[1]
+        if cred_ssid == 'null':
+            return False,'null','null'
+        else:
+            return True,cred_ssid,cred_psw
+    except:
+        set_credentials('null,null')
         return False,'null','null'
-    else:
-        return True,cred_ssid,cred_psw
-
 
 def set_credentials(c_data):
     print('Got credentials: ', c_data)
     print('Saving credentials...')
-    file = open("/structure/credentials","w")
+    file = open("credentials","w")
     file.write(c_data)
     file.close()
     print('Credentials Saved')

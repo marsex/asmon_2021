@@ -50,27 +50,27 @@ async def check_state(loop_delay):
             if cd_state != False:
                 wifi.connect(cd_ssid,cd_pw)
         else:
+            if update.check('sys_info')[0] == True:
+                print('\nSystem OUTDATED')
+                update.system()
+                print('\nSystem UPDATED')
+                print('\nRestarting system\n-----------------------\n\n')
+                machine.reset()
+            else:
+                print('\nSystem updated\nStart system')
+                
             if server_list == '':
                 try:
-                    if update.check('sys_info')[0] == True:
-                        print('\nSystem OUTDATED')
-                        update.system()
-                        print('\nSystem UPDATED')
-                        print('\nRestarting system\n-----------------------\n\n')
-                        machine.reset()
-                    else:
-                        print('\nSystem updated\nStart system')
-
-                        server_request = update.read_remote('server_list','https://raw.githubusercontent.com/marsex/asmon/master/')
-                        server_list = json.loads(server_request.text)
-                        data_host, data_port = server_list['data_host'][0].split(':')
-                        cam_host, cam_port = server_list['cam_host'][0].split(':')
-                        
-                        sys_info.set('server_list',server_list)
-                        sys_info.setd('data_server','host',data_host)
-                        sys_info.setd('data_server','port',data_port)
-                        sys_info.setd('cam_server','host',cam_host)
-                        sys_info.setd('cam_server','port',cam_port)
+                    server_request = update.read_remote('server_list',sys_info.git_url())
+                    server_list = json.loads(server_request.text)
+                    data_host, data_port = server_list['data_host'][0].split(':')
+                    cam_host, cam_port = server_list['cam_host'][0].split(':')
+                    
+                    sys_info.set('server_list',server_list)
+                    sys_info.setd('data_server','host',data_host)
+                    sys_info.setd('data_server','port',data_port)
+                    sys_info.setd('cam_server','host',cam_host)
+                    sys_info.setd('cam_server','port',cam_port)
                 except:
                     sys_info.reset()
 
