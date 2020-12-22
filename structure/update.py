@@ -1,4 +1,5 @@
 from structure import color, sys_info, urequests
+import uerrno
 import json
 
 def check(module_name):
@@ -28,6 +29,34 @@ def check(module_name):
     return "error: module '"+ module_name +"' not founded"
 
 
+def check(module_name):
+    global git_sys_info, esp_sys_info, git_url
+    esp_sys_info=sys_info.get('esp_sys_info')
+    git_sys_info=sys_info.get('git_sys_info')
+    git_url=sys_info.get('esp_sys_info')['git_url']
+    print('\n'+color.blue()+'git_sys_info:',color.normal(), str(git_sys_info).replace(',',',\n').replace('{','{\n ').replace('}','\n}'))
+    print('\n'+color.red()+'esp_sys_info:',color.normal(), str(esp_sys_info).replace(',',',\n').replace('{','{\n ').replace('}','\n}'))
+
+    sys_state=(False, 'system', 'updated')
+    try:
+        if module_name == '':
+            for module in git_sys_info:
+                try:
+                    if esp_sys_info[module] != git_sys_info[module]:
+                        sys_state = (False, module, "outdated")
+                except:
+                    print("error: module '"+ module +"' not founded")
+                return sys_state
+        else:
+            if esp_sys_info[module_name] != git_sys_info[module_name]:
+                return True, module_name, "outdated"
+            else:
+                return False, module_name, "updated"
+    except:
+        return "error: module '"+ module_name +"' not founded"
+
+
+
 def system():
   update_list = []
   for module in git_sys_info:
@@ -52,9 +81,10 @@ def git_file(file_name):
       file.close()
       print(color.normal()+outdated_file.text)
       print(color.green(),file_name,'updated\n'+color.normal())
-    except:
+    except OSError as e:
+        print(e)
       print("error: didn't found",file_name)
-  except:
+  except OSError as e:
     print('error: getting git file')
 
 
