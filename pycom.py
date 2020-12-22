@@ -39,29 +39,38 @@ def start(to):
 async def check_state(loop_delay):
     print(color.yellow()+'wifi state running'+color.normal())
     while True:
-        credentials = wifi.get_credentials()
-        cd_state, cd_ssid, cd_pw = credentials
-        wifi_st = network.WLAN(network.STA_IF).isconnected()
+        cd_state, cd_ssid, cd_pw = wifi.get_credentials()
+
+        st_wlan = network.WLAN(network.STA_IF)
+        st_wlan.active(True)
+        
+        wifi_st = st_wlan.isconnected()
         server_list = sys_info.get('server_list')
         data_server = sys_info.get('data_server')
         cam_server = sys_info.get('cam_server')
+        git_sys_info = sys_info.get('git_sys_info')
         sys_info.set('wifi',wifi_st)
         if wifi_st == False:
-            if cd_state != False:
-                wifi.connect(cd_ssid,cd_pw)
-        else:
-            if update.check('sys_info')[0] == True:
-                print('\nSystem OUTDATED')
-                update.system()
-                print('\nSystem UPDATED')
-                print('\nRestarting system\n-----------------------\n\n')
-                machine.reset()
+            if cd_state == True:
+                print('Connecting to:',cd_ssid,cd_pw)
+                st_wlan.connect(cd_ssid,cd_pw)
             else:
-                print('\nSystem updated\nStart system')
+                print('Waiting for Wifi Credentials')
+        else:
+            if git_sys_info == '':
+                sys_info.set('git_sys_info',sys_info.git_info())
+                if update.check('sys_info')[0] == True:
+                    print('\nSystem OUTDATED')
+                    update.system()
+                    print('\nSystem UPDATED')
+                    print('\nRestarting system\n-----------------------\n\n')
+                    machine.reset()
+                else:
+                    print('\nSystem updated\nStart system')
                 
             if server_list == '':
                 try:
-                    server_request = update.read_remote('server_list',sys_info.git_url())
+                    server_request = update.read_remote('server_list',sys_info.get('esp_sys_info')['git_url'])
                     server_list = json.loads(server_request.text)
                     data_host, data_port = server_list['data_host'][0].split(':')
                     cam_host, cam_port = server_list['cam_host'][0].split(':')
@@ -94,7 +103,7 @@ async def ap_sv(to):
             # Use:
             poller = uselect.poll()
             poller.register(client, uselect.POLLIN)
-            res = poller.poll(50)  # time in milliseconds
+            res = poller.poll(200)  # time in milliseconds
             if not res:
                 print('\toperation timed out')
             else:
@@ -231,7 +240,6 @@ async def data(to):
         data_address = data_server['address']
         wifi_st = sys_info.get('wifi')
         if wifi_st == False:
-            print('Wifi not ready')
             await asyncio.sleep(3)
         if wifi_st != False:
             if data_address == '':
@@ -330,7 +338,6 @@ async def sendcam(to):
         wifi_st = sys_info.get('wifi')
         wifi_st = sys_info.get('wifi')
         if wifi_st == False:
-            print('Wifi not ready')
             await asyncio.sleep(3)
         if wifi_st != False:
             if cam_address == '':

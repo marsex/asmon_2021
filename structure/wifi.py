@@ -36,20 +36,16 @@ def get_networks():
 
 
 def get_credentials():
-    global cred_ssid, cred_psw
-    try:
-        file = open("credentials","r")
-        data = file.read()
-        file.close()
-        cred_ssid=data.split(",")[0]
-        cred_psw=data.split(",")[1]
-        if cred_ssid == 'null':
-            return False,'null','null'
-        else:
-            return True,cred_ssid,cred_psw
-    except:
-        set_credentials('null,null')
+    file = open("credentials","r")
+    data = file.read()
+    file.close()
+    cred_ssid=data.split(",")[0]
+    cred_psw=data.split(",")[1]
+    if cred_ssid == 'null':
         return False,'null','null'
+    else:
+        return True,cred_ssid,cred_psw
+
 
 def set_credentials(c_data):
     print('Got credentials: ', c_data)
@@ -62,7 +58,7 @@ def set_credentials(c_data):
 
 def connect(cred_ssid,cred_psw):
     print('\n{\n\tConnecting to network: ' +cred_ssid)
-    st_wlan = network.WLAN(network.STA_IF).isconnected()
+    st_wlan = network.WLAN(network.STA_IF)
     st_wlan.active(True)
 
     if cred_ssid != 'null':

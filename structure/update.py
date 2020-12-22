@@ -3,9 +3,9 @@ import json
 
 def check(module_name):
   global git_sys_info, esp_sys_info, git_url
-  esp_sys_info=sys_info.esp_info()
-  git_sys_info=sys_info.git_info()
-  git_url=sys_info.git_url()
+  esp_sys_info=sys_info.get('esp_sys_info')
+  git_sys_info=sys_info.get('git_sys_info')
+  git_url=sys_info.get('esp_sys_info')['git_url']
   print('\n'+color.blue()+'git_sys_info:',color.normal(), str(git_sys_info).replace(',',',\n').replace('{','{\n ').replace('}','\n}'))
   print('\n'+color.red()+'esp_sys_info:',color.normal(), str(esp_sys_info).replace(',',',\n').replace('{','{\n ').replace('}','\n}'))
 

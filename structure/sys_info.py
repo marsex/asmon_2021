@@ -1,9 +1,6 @@
 from structure import urequests
 import json
 
-def git_url():
-    return esp_sys_info['git_url']
-
 def esp_info():
     print('\n{\n\tgetting esp system info')
     try:
@@ -16,11 +13,10 @@ def esp_info():
         print('\terror getting esp system info\n}\n')
         return False
 
-
 def git_info():
     print('\n{\n\tgetting git system info')
     try:
-        git_sys_info = json.loads(urequests.get(git_url()+'sys_info').text)
+        git_sys_info = json.loads(urequests.get(get('esp_sys_info')['git_url']+'sys_info').text)
         print('\tgot git system info\n}')
         return git_sys_info
     except:
@@ -59,7 +55,9 @@ def reset():
         'cam':'',
         'data_server':{'host':'','port':'','address':'','timeout':''},
         'cam_server':{'host':'','port':'','address':'','timeout':''},
+        'esp_sys_info':'',
+        'git_sys_info':'',
         'server_list':''
     }
+    set('esp_sys_info',esp_info())
     
-esp_sys_info = esp_info()
