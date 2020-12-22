@@ -17,6 +17,8 @@ def ap_on():
 def scan_networks():
     global scan_list
     station = network.WLAN(network.STA_IF)
+    station.active(False)
+    
     station.active(True)
     while True:
         try:
