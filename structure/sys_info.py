@@ -18,7 +18,7 @@ def git_info():
         print('\n'+color.blue()+'git_sys_info:',color.normal(), str(git_sys_info).replace(',',',\n').replace('{','{\n ').replace('}','\n}'))
         return git_sys_info
     except:
-        print('\terror getting git system info\n}\n')|
+        print('\terror getting git system info\n}\n')
         return False
 
 def get(key):
