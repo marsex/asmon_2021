@@ -2,7 +2,6 @@ from structure import urequests, color
 import json
 
 def esp_info():
-    print('\n{\n\tgetting esp system info')
     try:
         sys_file = open('sys_info','r')
         esp_sys_info = json.loads(sys_file.read())
@@ -14,13 +13,12 @@ def esp_info():
         return False
 
 def git_info():
-    print('\n{\n\tgetting git system info')
     try:
         git_sys_info = json.loads(urequests.get(get('esp_sys_info')['git_url']+'sys_info').text)
         print('\n'+color.blue()+'git_sys_info:',color.normal(), str(git_sys_info).replace(',',',\n').replace('{','{\n ').replace('}','\n}'))
         return git_sys_info
     except:
-        print('\terror getting git system info\n}\n')
+        print('\terror getting git system info\n}\n')|
         return False
 
 def get(key):

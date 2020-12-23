@@ -51,7 +51,7 @@ def git_file(file_name):
             file = open(file_name,"w")
             file.write(outdated_file.text)
             file.close()
-            print(color.normal()+outdated_file.text)
+            #print(color.normal()+outdated_file.text)
             print(color.green(),file_name,'updated\n'+color.normal())
         except OSError as e:
             print(e)
