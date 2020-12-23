@@ -42,17 +42,18 @@ async def check_state(loop_delay):
         cd_state, cd_ssid, cd_pw = wifi.get_credentials()
 
         st_wlan = network.WLAN(network.STA_IF)
-        st_wlan.active(True)
-        
         wifi_st = st_wlan.isconnected()
+        
         server_list = sys_info.get('server_list')
         data_server = sys_info.get('data_server')
         cam_server = sys_info.get('cam_server')
         git_sys_info = sys_info.get('git_sys_info')
+        
         sys_info.set('wifi',wifi_st)
         if wifi_st == False:
             if cd_state == True:
                 print('Connecting to:',cd_ssid,cd_pw)
+                st_wlan.active(True)
                 st_wlan.connect(cd_ssid,cd_pw)
             else:
                 print('Waiting for Wifi Credentials')

@@ -45,19 +45,19 @@ def system():
 
 
 def git_file(file_name):
-  try:
-    outdated_file=urequests.get(git_url+file_name)
     try:
-      file = open(file_name,"w")
-      file.write(outdated_file.text)
-      file.close()
-      print(color.normal()+outdated_file.text)
-      print(color.green(),file_name,'updated\n'+color.normal())
+        outdated_file=urequests.get(git_url+file_name)
+        try:
+            file = open(file_name,"w")
+            file.write(outdated_file.text)
+            file.close()
+            print(color.normal()+outdated_file.text)
+            print(color.green(),file_name,'updated\n'+color.normal())
+        except OSError as e:
+            print(e)
+            print("error: didn't found",file_name)
     except OSError as e:
-        print(e)
-      print("error: didn't found",file_name)
-  except OSError as e:
-    print('error: getting git file')
+        print('error: getting git file')
 
 
 def remote(file_name,file_dir,from_url):
