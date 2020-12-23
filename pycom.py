@@ -11,6 +11,8 @@ import json
 import gc
 import machine
 
+from structure import check_state, data_com, cam_com, ap_cam, ap_sv
+
 wifi.ap_on()
 wifi.scan_networks()
 
@@ -23,11 +25,11 @@ def start(to):
         sys_info.reset()
     try:
         main_loop = asyncio.new_event_loop()
-        main_loop.create_task(check_state(2))
-        main_loop.create_task(send_data(to))
-        main_loop.create_task(send_cam(to))
-        main_loop.create_task(ap_cam(to))
-        main_loop.create_task(ap_sv(to))
+        main_loop.create_task(check_state.start(2))
+        main_loop.create_task(data_com.start(to))
+        main_loop.create_task(cam_com.start(to))
+        main_loop.create_task(ap_cam.start(to))
+        main_loop.create_task(ap_sv.start(to))
         main_loop.run_forever()
     except OSError as e:
         print("async failed"+str(e)) 

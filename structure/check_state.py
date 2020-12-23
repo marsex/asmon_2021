@@ -11,7 +11,7 @@ import json
 import gc
 import machine
 
-async def check_state(loop_delay):
+async def start(loop_delay):
     print(color.yellow()+'wifi state running'+color.normal())
     while True:
         cd_state, cd_ssid, cd_pw = wifi.get_credentials()

@@ -1,6 +1,17 @@
+from structure import machine_data, color, cam, wifi, sys_info, update
+from structure import headers as hdr
+from time import sleep
 import uasyncio as asyncio
+import network
+import uselect
+import camera
+import socket
+import uerrno
+import json
+import gc
+import machine
 
-async def ap_sv(to):
+async def start(to):
     print(color.yellow()+'STARTING AP_SV'+color.normal())
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

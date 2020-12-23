@@ -11,7 +11,7 @@ import json
 import gc
 import machine
 
-async def send_cam(to):
+async def start(to):
     await asyncio.sleep(1)
     print(color.blue()+'STARTING PYCOM CAM'+color.normal())
     await asyncio.sleep(1)

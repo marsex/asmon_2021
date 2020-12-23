@@ -11,7 +11,7 @@ import json
 import gc
 import machine
 
-async def send_data(to):
+async def start(to):
     global json_command
     print(color.green()+'STARTING PYCOM DATA'+color.normal())
     await asyncio.sleep(1)
