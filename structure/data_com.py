@@ -11,6 +11,8 @@ import json
 import gc
 import machine
 
+json_command={}
+
 async def start(to):
     global json_command
     print(color.green()+'STARTING PYCOM DATA'+color.normal())
@@ -83,11 +85,16 @@ async def start(to):
                                 print('\treceiving server data')
                                 while True:
                                     try:
-                                        res = str(s.recv(256))
+                                        res = s.recv(256)
                                         await asyncio.sleep(.1)
-                                        if res.find('command') != -1:
+                                        if str(res).find('command') != -1:
                                             print('\tserver data received: ')
-                                            print('\t'+res)
+                                            print(res)
+                                            try:
+                                                js_res = json.loads(res)
+                                                machine_data.parse_data(js_res)
+                                            except:
+                                                print('failed to parse json')
                                             break
                                     except OSError as e:
                                         if conn_try > to:

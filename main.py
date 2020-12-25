@@ -18,8 +18,6 @@ wifi.scan_networks()
 
 cam.start()
 
-json_command={}
-
 def start(to):
     if sys_info.restore() == False:
         sys_info.reset()

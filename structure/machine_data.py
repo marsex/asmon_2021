@@ -97,19 +97,19 @@ def parse_data(command_json):
     #print('got command')
 
     if command_json['command'] == 'output_state':
-        data = command_json['data'].split('=')
+        data = command_json['update'].split('=')
         pin = int(data[0])-1
         state = int(data[1])
         out_gpio = out_pins()
         Pin(out_gpio[pin], value=state)
     elif command_json['command'] == 'dht1':
-        data = command_json['data'].split(',')
+        data = command_json['update'].split(',')
         print(data)
         for x in data:
             objeto = x.split('=')
             set_double('dht1', objeto[0], objeto[1])
     elif command_json['command'] == 'remote_update':
-        update_info = command_json['data'].split(',')
+        update_info = command_json['update'].split(',')
         print('try to update', update_info)
         update.remote(update_info[0], update_info[1], update_info[2])
     # except:
