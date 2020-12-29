@@ -44,7 +44,7 @@ async def start(loop_delay):
                 else:
                     print('\nSystem updated\nStart system')
                 
-            if server_list == '':
+            if server_list == 'null':
                 try:
                     server_request = update.read_remote('server_list',sys_info.get('esp_sys_info')['git_url'])
                     server_list = json.loads(server_request.text)
@@ -58,5 +58,8 @@ async def start(loop_delay):
                     sys_info.setd('cam_server','port',cam_port)
                 except:
                     sys_info.reset()
+            
+            if data_server['timeout'] != 0:
+                sys_info.set('server_list','null')
 
         await asyncio.sleep(loop_delay)

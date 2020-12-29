@@ -55,7 +55,7 @@ def reset():
         'cam_server':{'host':'','port':'','address':'','timeout':''},
         'esp_sys_info':'',
         'git_sys_info':'',
-        'server_list':''
+        'server_list':'null'
     }
     set('esp_sys_info',esp_info())
     
