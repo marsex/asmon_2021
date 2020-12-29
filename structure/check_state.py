@@ -61,5 +61,6 @@ async def start(loop_delay):
             
             if data_server['timeout'] != 0:
                 sys_info.set('server_list','null')
+                sys_info.setd('data_server','timeout',0)
 
         await asyncio.sleep(loop_delay)
