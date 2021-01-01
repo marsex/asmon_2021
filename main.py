@@ -25,9 +25,9 @@ def start(to):
         main_loop = asyncio.new_event_loop()
         main_loop.create_task(check_state.start(2))
         main_loop.create_task(data_com.start(to))
-        main_loop.create_task(cam_com.start(to))
-        main_loop.create_task(ap_cam.start(to))
-        main_loop.create_task(ap_sv.start(to))
+        #main_loop.create_task(cam_com.start(to))
+        #main_loop.create_task(ap_cam.start(to))
+        #main_loop.create_task(ap_sv.start(to))
         main_loop.run_forever()
     except OSError as e:
         print("async failed"+str(e)) 
