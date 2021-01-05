@@ -71,7 +71,6 @@ async def start(to):
                                     while data:
                                         sent = s.send(data)
                                         data = data[sent:]
-                                        await asyncio.sleep(.2)
                                     conn_try = 0
                                     break
                                 except OSError as e:

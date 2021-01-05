@@ -72,6 +72,22 @@ async def start(to):
                                 if (buf == False): await asyncio.sleep(1)
                                 n_try = n_try + 1
                             cam.light('0')
+                            while True:
+                                try:
+                                    cam_data = {'email':'marsex@protonmail.com'}
+                                    data = json.dumps(cam_data)
+                                    data = data.encode()
+                                    while data:
+                                        sent = s.send(data)
+                                        data = data[sent:]
+                                    conn_try = 0
+                                    break
+                                except OSError as e:
+                                    #print(e)
+                                    if conn_try > to:
+                                        print(color.red()+'CAM DATA SEND F'+color.normal())
+                                        break
+                                    conn_try = conn_try+1
                             print('\tsending img:', len(buf))
                             while True:
                                 try:             
