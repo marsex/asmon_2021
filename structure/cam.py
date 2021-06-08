@@ -11,7 +11,10 @@ def start():
     global cr
     wc = 0
     while True:
-        cr = camera.init(0, format=camera.JPEG) 
+        try:
+            cr = camera.init(0, format=camera.JPEG) 
+        except:
+            print('error initiating camera')
         print("Camera ready?: ", cr)
         if cr:
             camera.framesize(camera.FRAME_VGA)

@@ -12,7 +12,9 @@ import gc
 import machine
 
 async def start(to):
+    await asyncio.sleep(.24)
     print(color.yellow()+'STARTING AP_CAM'+color.normal())
+    await asyncio.sleep(1)
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     a = ('0.0.0.0', 81)

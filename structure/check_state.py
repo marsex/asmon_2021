@@ -12,6 +12,7 @@ import gc
 import machine
 
 async def start(loop_delay):
+    await asyncio.sleep(.1)
     print(color.yellow()+'wifi state running'+color.normal())
     while True:
         cd_state, cd_ssid, cd_pw = wifi.get_credentials()
@@ -50,7 +51,7 @@ async def start(loop_delay):
                     server_list = json.loads(server_request.text)
                     data_host, data_port = server_list['data_host'][0].split(':')
                     cam_host, cam_port = server_list['cam_host'][0].split(':')
-                    
+
                     sys_info.set('server_list',server_list)
                     sys_info.setd('data_server','host',data_host)
                     sys_info.setd('data_server','port',data_port)
@@ -58,9 +59,7 @@ async def start(loop_delay):
                     sys_info.setd('cam_server','port',cam_port)
                 except:
                     sys_info.reset()
-            
-            if data_server['timeout'] != 0:
-                sys_info.set('server_list','null')
-                sys_info.setd('data_server','timeout',0)
-
+            # if data_server['timeout'] != 0:
+                # sys_info.set('server_list','null')
+                # sys_info.setd('data_server','timeout',0)
         await asyncio.sleep(loop_delay)

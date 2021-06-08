@@ -7,7 +7,7 @@ scan_list = []
 def ap_on():
     ap_wlan = network.WLAN(network.AP_IF)
     ap_wlan.active(True)
-    ap_wlan.config(essid='ASMON AP System')
+    ap_wlan.config(essid='ASMON AP System#2')
     ap_wlan.config(authmode=3, password='12551255')
     ap_localhost = ap_wlan.ifconfig()[0]  # get ip addr
     print('AP Configurated\n')

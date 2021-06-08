@@ -23,7 +23,7 @@ def start(to):
         sys_info.reset()
     try:
         main_loop = asyncio.new_event_loop()
-        main_loop.create_task(check_state.start(2))
+        main_loop.create_task(check_state.start(10))
         #main_loop.create_task(data_com.start(to))
         main_loop.create_task(cam_com.start(to))
         #main_loop.create_task(ap_cam.start(to))

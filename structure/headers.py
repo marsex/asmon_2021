@@ -1,4 +1,4 @@
-from structure import wifi
+from structure import wifi, machine_data
 import gc
 
 hdr = {
@@ -96,12 +96,16 @@ def get_index():
             tr_done = tr_format.replace('$ssid', net_ssid).replace('$signal_state', signal_state)
             tr_swap = tr_swap + tr_done
 
+    device_id = machine_data.get_key('id')
+    user_id = machine_data.get_key('user')
+    user_psw = machine_data.get_key('psw')
     credentials_state, cred_ssid, cred_psw = wifi.get_credentials()
     print(tr_swap)
     gc.collect()
     file = open('/www/index.html', 'r')
     chtml = file.read()
     chtml = chtml.replace('$tr_swap', tr_swap).replace('$cred_ssid', cred_ssid).replace('$cred_psw', cred_psw)
+    chtml = chtml.replace('$device_id', device_id).replace('$user_id', user_id).replace('$user_psw', user_psw)
     file.close()
     html=hdr['html'].replace('$html',chtml)
     return html

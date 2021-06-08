@@ -12,7 +12,9 @@ import gc
 import machine
 
 async def start(to):
+    await asyncio.sleep(.18)
     print(color.yellow()+'STARTING AP_SV'+color.normal())
+    await asyncio.sleep(1)
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     a = ('0.0.0.0', 80)
@@ -57,8 +59,7 @@ async def start(to):
                             print(e)
                 elif req[1] == 'gpio':
                     pin, value = req[2], req[3]
-
-                    command_json = {'command': 'output_state', 'data': pin+'='+value}
+                    command_json = {'command': 'output_state', 'data': {'pin':pin,'value':value}}
                     machine_data.parse_data(command_json)
 
                     esp_data = machine_data.get()

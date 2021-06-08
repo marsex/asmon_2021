@@ -88,46 +88,6 @@ async def start(to):
                                 conn_try = conn_try+1
                                 await asyncio.sleep(.1)
 
-                        print('sending end line')
-                        data = json.dumps({'command':'imgsent'})
-                        data = data.encode()
-                        while True:
-                            try:
-                                while data:
-                                    sent = s.send(data)
-                                    data = data[sent:]
-                                conn_try = 0
-                                print('\tdata sent')
-                                machine_data.set('command',{'command':'wait'})
-                                break
-                            except OSError as e:
-                                if conn_try > to:
-                                    print(color.red()+'DATA SEND F'+color.normal())
-                                    break
-                                conn_try = conn_try+1
-                                await asyncio.sleep(.1)   
-                                
-                        print('\treceiving CAM server data')
-                        while True:
-                            try:
-                                res = s.recv(256)
-                                await asyncio.sleep(.01)
-                                print(res)
-                                if str(res).find('command') != -1:
-                                    print('\tCAM server data received: ')
-                                    print(res)
-                                    break
-                                if conn_try > to*10:
-                                    print(color.red()+'CAM RECV F'+color.normal())
-                                    break
-                                conn_try = conn_try + 1
-                            except OSError as e:
-                                if conn_try > to:
-                                    print(color.red()+'CAM RECV F'+color.normal())
-                                    break
-                                conn_try = conn_try + 1
-                                await asyncio.sleep(.1)
-
                     print(color.yellow()+'\tcam conn_try', conn_try)
                     print(color.red()+'\tcam out\n}\n'+color.normal())
                     sys_info.setd('cam_server','timeout',conn_try)
