@@ -1,7 +1,7 @@
 {
   "git_url":"https://marsex.github.io/asmon_2021/",
-  "sys_info":"0.9.1.5",
-  "/structure/cam_com.py":"0.9.1.5",
+  "sys_info":"0.9.1.6",
+  "/structure/cam_com.py":"0.9.1.6",
   "/structure/machine_data.py":"0.9.1.1",
   "/structure/headers.py":"0.9.1.1",
   "/structure/ap_sv.py":"0.9.1.1",
