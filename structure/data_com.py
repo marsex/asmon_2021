@@ -90,19 +90,24 @@ async def start(to):
                                     if str(res).find('command') != -1:
                                         print('\tDATA server data received: ')
                                         print('\t',color.yellow(),res,color.normal())
-                                        conn_try = 0
+                                        try:
+                                            js_res = json.loads(res)
+                                        except:
+                                            print('failed to load json')
+                                        try:
+                                            machine_data.parse_data(js_res)
+                                            conn_try = 0
+                                        except:
+                                            print('failed to parse data',js_res)
                                         break
-                                        
                                     if conn_try > to*10:
                                         print(color.red()+'\tDATA RECV F'+color.normal())
                                         break
-                                        
                                     conn_try = conn_try + 1
                                 except OSError as e:
                                     if conn_try > to:
                                         print(color.red()+'\tERROR DATA RECV F'+color.normal())
                                         break
-                                        
                                     conn_try = conn_try + 1
                                     await asyncio.sleep(.1)
                             await asyncio.sleep(.1)
