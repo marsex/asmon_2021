@@ -10,6 +10,7 @@ out_gpio = [2, 14, 12]
 machine_data = {
     "command":{'command':'wait'},
     "uptime": str(time.time()),
+    "board":"ESP-CAMv1.0",
     "user": "EMAIL",
     "psw": "123",
     "id":"CAMARA 02",
@@ -30,6 +31,8 @@ def inp_pins():
 
 def parse_data(command_json):
     if command_json['command'] == 'output_state':
+        print(command_json['data']['pin'])
+        print(command_json['data']['value'])
         pin = int(command_json['data']['pin'])
         state = int(command_json['data']['value'])
         command = {'command':'output_updated','data':{'pin':pin,'state':state}}

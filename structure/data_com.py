@@ -60,55 +60,54 @@ async def start(to):
                     if connected == True:
                         print(color.green()+'\tconnected to data_address'+color.normal())
                         conn_try = 0
-                        print('\tsending esp_data')
-                        data = json.dumps(machine_data.get())
-                        data = data.encode()
                         while True:
-                            try:
-                                while data:
-                                    sent = s.send(data)
-                                    data = data[sent:]
-                                conn_try = 0
-                                print('\tdata sent')
-                                machine_data.set('command',{'command':'wait'})
+                            if conn_try > to:
+                                print('\n\tcouldnt send data')
                                 break
-                            except OSError as e:
-                                if conn_try > to:
-                                    print(color.red()+'DATA SEND F'+color.normal())
-                                    break
-                                conn_try = conn_try+1
-                                await asyncio.sleep(.1)
                                 
-                        print('\treceiving server data')
-                        while True:
-                            try:
-                                res = s.recv(256)
-                                await asyncio.sleep(.01)
-                                if str(res).find('command') != -1:
-                                    print('\tserver data received: ')
-                                    print(res)
-                                    try:
-                                        js_res = json.loads(res)
-                                    except:
-                                        print('failed to load json')
-                                    try:
-                                        machine_data.parse_data(js_res)
-                                    except:
-                                        print('failed to parse data',js_res)
+                            data = json.dumps(machine_data.get())
+                            data = data.encode()
+                            while True:
+                                try:
+                                    while data:
+                                        sent = s.send(data)
+                                        data = data[sent:]
+                                        await asyncio.sleep(.01)
+                                    print('\tdata sent')
                                     break
-                                if conn_try > to*10:
-                                    print(color.red()+'DATA RECV F'+color.normal())
-                                    break
-                                conn_try = conn_try + 1
-                            except OSError as e:
-                                if conn_try > to:
-                                    print(color.red()+'DATA RECV F'+color.normal())
-                                    break
-                                conn_try = conn_try + 1
-                                await asyncio.sleep(.1)
-
+                                except OSError as e:
+                                    if conn_try > to:
+                                        print(color.red()+'DATA SEND F'+color.normal())
+                                        conn_try = 0
+                                        break
+                                    conn_try = conn_try+1
+                                    await asyncio.sleep(.1)
+                            print('\treceiving DATA server data')
+                            while True:
+                                try:
+                                    res = s.recv(256)
+                                    await asyncio.sleep(.01)
+                                    if str(res).find('command') != -1:
+                                        print('\tDATA server data received: ')
+                                        print('\t',color.yellow(),res,color.normal())
+                                        conn_try = 0
+                                        break
+                                        
+                                    if conn_try > to*10:
+                                        print(color.red()+'\tDATA RECV F'+color.normal())
+                                        break
+                                        
+                                    conn_try = conn_try + 1
+                                except OSError as e:
+                                    if conn_try > to:
+                                        print(color.red()+'\tERROR DATA RECV F'+color.normal())
+                                        break
+                                        
+                                    conn_try = conn_try + 1
+                                    await asyncio.sleep(.1)
+                            await asyncio.sleep(.1)
                     print(color.yellow()+'\tdata conn_try', conn_try)
-                    print(color.red()+'\tesp_data out\n}\n'+color.normal())
+                    print(color.red()+'\tdata out\n}\n'+color.normal())
                     sys_info.setd('data_server','timeout',conn_try)
                     s.close()
                     del s
