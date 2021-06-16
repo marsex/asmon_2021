@@ -223,7 +223,6 @@ transform: translateX(10px);
 	
 	selected_device="$device_id"
 	selected_user="$user_id"
-	selected_userpsw="$user_psw"
 	
     selected_ssid = "$cred_ssid"
     selected_psw = "$cred_psw"
@@ -257,9 +256,10 @@ transform: translateX(10px);
 		send_data(command,data)
     }
     function save_userdata(){
-		ssid_psw = document.getElementById('wifi_psw').value
-		command = 'credentials'
-		data = selected_ssid + "/" + ssid_psw
+		email_ssid = document.getElementById('email_ssid').value
+		cam_id = document.getElementById('cam_id').value
+		command = 'user_data'
+		data = email_ssid + "/" + cam_id
 		send_data(command,data)
     }
 	

@@ -79,6 +79,22 @@ async def start(to):
 
                     client.send(b'%s' % json_header)
                     client.sendall(json_response.encode())
+                elif req[1] == 'user_data':
+                    user, id = req[2], req[3]
+                    try:
+                        id = id.replace('%20',' ')
+                    except:
+                        e = ''
+                    dev_id = machine_data.get_key('id')
+                    machine_data.set('command',{'command':'popdev','dev_id':dev_id,'user':machine_data.get_key('user')}) 
+                    machine_data.set('user',user)
+                    machine_data.set('id',id)
+                    
+                    json_response = json.dumps({'command':'user_data','state': 'saved'})
+                    json_header = hdr.get('json').replace('$len',str(len(json_response)))
+
+                    client.send(b'%s' % json_header)
+                    client.sendall(json_response.encode())
             client.close()
             print(color.red()+ '\tConnection ' + ip + ':' + port + ' closed'+color.normal()+'\n}')
         except OSError as e:

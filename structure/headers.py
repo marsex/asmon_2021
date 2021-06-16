@@ -105,7 +105,7 @@ def get_index():
     file = open('/www/index.html', 'r')
     chtml = file.read()
     chtml = chtml.replace('$tr_swap', tr_swap).replace('$cred_ssid', cred_ssid).replace('$cred_psw', cred_psw)
-    chtml = chtml.replace('$device_id', device_id).replace('$user_id', user_id).replace('$user_psw', user_psw)
+    chtml = chtml.replace('$device_id', device_id).replace('$user_id', user_id)
     file.close()
     html=hdr['html'].replace('$html',chtml)
     return html
