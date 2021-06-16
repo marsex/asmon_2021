@@ -74,6 +74,7 @@ async def start(to):
                                         data = data[sent:]
                                         await asyncio.sleep(.01)
                                     print('\tdata sent')
+                                    machine_data.set('command',{'command':'wait'})
                                     break
                                 except OSError as e:
                                     if conn_try > to:

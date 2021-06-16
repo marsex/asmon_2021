@@ -11,9 +11,9 @@ machine_data = {
     "command":{'command':'wait'},
     "uptime": str(time.time()),
     "board":"ESP-CAMv1.0",
-    "user": "EMAIL",
-    "psw": "123",
-    "id":"CAMARA 01",
+    "user": "null",
+    "psw": "null",
+    "id":"CAMARA 02",
     "gpio": {
         "input_state": [0, 0],
         "output_state": [0, 0, 0]
