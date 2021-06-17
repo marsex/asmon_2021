@@ -35,6 +35,7 @@ async def start(to):
             if not res:
                 print('\toperation timed out')
             else:
+                await asyncio.sleep(.1)
                 client_data = client.recv(1024)
                 client_data = client_data.decode('utf-8')
                 req = client_data.split(' ')

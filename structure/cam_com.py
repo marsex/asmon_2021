@@ -36,15 +36,19 @@ async def start(to):
                     print('cam_host not ready')
                     await asyncio.sleep(3)
             else:
-                conn_try=0
+                conn_try= 0
+                timeout=0
+                timeout_time=to
+                trycount=0
+                trycount_timeout=to
                 print(color.blue()+'{\n\tCONNECTING TO PYCOM CAM'+color.normal())
                 try:
-                    s = socket.socket()
-                    s.setblocking(False)
+                    client = socket.socket()
+                    client.setblocking(False)
                     connected = False
                     while connected == False:
                         try:
-                            s.connect(cam_address)
+                            client.connect(cam_address)
                         except OSError as e:
                             if str(e) == "127":
                                 connected = True
@@ -59,64 +63,67 @@ async def start(to):
                     #connected
                     if connected == True:
                         print(color.blue()+'\tconnected to cam_address'+color.normal())
-                        conn_try = 0
                         while True:
-                            if conn_try > to:
-                                print('\n\tcouldnt send picture')
+                            if timeout > timeout_time:
+                                print(color.blue(),'failed to send image',trycount,timeout,color.normal())
                                 break
+                            if trycount > trycount_timeout:
+                                print('couldnt send image')
+                                break
+                            await asyncio.sleep(.1)
+                            
                             img_data = {'user':machine_data.get_key('user'),'id':machine_data.get_key('id')}
                             id_data = json.dumps(img_data)
                             id_data = id_data.encode()
-                            frame = False
-                            cam.light('1')
-                            print('\tgetting img')
-                            frame = camera.capture()
-                            cam.light('0')
                             data = json.dumps({'command':'imgsent'})
                             data = data.encode()
+
+                            frame = False
+                            cam.light('1')
+                            frame = camera.capture()
+                            cam.light('0')
+                            
                             frame = id_data + frame + data
-                            print('\tsending img')
                             while True:
                                 try:
                                     while frame:
-                                        sent = s.send(frame)
+                                        sent = client.send(frame)
                                         frame = frame[sent:]
-                                        await asyncio.sleep(.01)
-                                    print('\timg sent')
+                                    print(color.blue(),'image sent',color.normal())
+                                    timeout = 0
                                     break
-                                except OSError as e:
-                                    if conn_try > to:
-                                        print(color.red()+'CAM SEND F'+color.normal())
-                                        conn_try = 0
+                                except:
+                                    timeout = timeout + 1
+                                    if timeout > timeout_time*2:
+                                        print(color.blue(),'failed to send image',trycount,timeout,color.normal())
                                         break
-                                    conn_try = conn_try+1
+                            if timeout == 0:
+                                while True:
+                                    trycount = trycount + 1
+                                    if trycount > trycount_timeout:
+                                        print(color.blue(),'couldnt receive image data',color.normal())
+                                        break
+                                    print(color.blue(),'tries to read:',trycount,timeout,color.normal())
                                     await asyncio.sleep(.1)
-                            print('\treceiving CAM server data')
-                            while True:
-                                try:
-                                    res = s.recv(256)
-                                    await asyncio.sleep(.01)
-                                    if str(res).find('command') != -1:
-                                        print('\tCAM server data received: ')
-                                        print('\t',color.blue(),res,color.normal())
-                                        conn_try = 0
-                                        break
-                                    if conn_try > to*10:
-                                        print(color.red()+'\tCAM RECV F'+color.normal())
-                                        break
-                                    conn_try = conn_try + 1
-                                except OSError as e:
-                                    if conn_try > to:
-                                        print(color.red()+'\tERROR CAM RECV F'+color.normal())
-                                        break
-                                    conn_try = conn_try + 1
-                                    await asyncio.sleep(.1)
-                            await asyncio.sleep(.1)
-                    print(color.yellow()+'\tcam conn_try', conn_try)
+                                    try:
+                                        res = client.recv(256)
+                                        if str(res).find('command') != -1:
+                                            print(color.blue(),res,color.normal())
+                                            timeout = 0
+                                            break
+                                    except:
+                                        timeout = timeout +1
+                                        if timeout > timeout_time:
+                                            print(color.blue(),'failed to read image data',timeout,color.normal())
+                                            break
+                            if timeout == 0:
+                                trycount = 0
+                            print('') #send again
+                    print(color.blue()+'\tcam trycount', trycount)
                     print(color.red()+'\tcam out\n}\n'+color.normal())
                     sys_info.setd('cam_server','timeout',conn_try)
-                    s.close()
-                    del s
+                    client.close()
+                    del client
                 except OSError as e:
                     print('cam socket failed',str(e))
         gc.collect()
