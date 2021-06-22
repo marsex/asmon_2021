@@ -3,7 +3,7 @@ import json
 
 def esp_info():
     try:
-        sys_file = open('sys_info','r')
+        sys_file = open('/structure/sys_info','r')
         esp_sys_info = json.loads(sys_file.read())
         sys_file.close()
         print('\n'+color.red()+'esp_sys_info:',color.normal(), str(esp_sys_info).replace(',',',\n').replace('{','{\n ').replace('}','\n}'))
