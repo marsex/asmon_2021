@@ -85,6 +85,7 @@ async def start(to):
                             
                             frame = id_data + frame + data
                             while True:
+                                await asyncio.sleep(.1)
                                 try:
                                     while frame:
                                         sent = client.send(frame)
