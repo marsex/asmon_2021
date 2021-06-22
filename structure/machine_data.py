@@ -13,7 +13,7 @@ machine_data = {
     "board":"ESP-CAMv1.0",
     "user": "null",
     "psw": "null",
-    "id":"CAMARA 02",
+    "id":"CAMARA 01",
     "gpio": {
         "input_state": [0, 0],
         "output_state": [0, 0, 0]
